@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Card,
@@ -8,154 +8,183 @@ import {
   Box,
   Chip,
   Divider,
+  Modal,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import WarningIcon from '@mui/icons-material/Warning';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { weatherNews } from '../data/weatherNews';
 
 const NewsCard = styled(Card)(({ theme }) => ({
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  display: 'flex',
+  flexDirection: 'column',
+  background: 'rgba(255, 255, 255, 0.95)',
   backdropFilter: 'blur(10px)',
-  borderRadius: 16,
-  marginBottom: 16,
-  transition: 'transform 0.2s ease-in-out',
+  transition: 'transform 0.3s ease-in-out',
+  cursor: 'pointer',
   '&:hover': {
-    transform: 'translateY(-4px)',
+    transform: 'scale(1.02)',
   },
 }));
 
-const WeatherNews = () => {
-  const weatherNews = [
-    {
-      date: 'April 28, 2024',
-      title: 'Severe Thunderstorms Sweep Across Midwest',
-      description: 'Multiple states experience severe weather conditions with hail and strong winds.',
-      severity: 'warning',
-      location: 'Midwest, USA',
-    },
-    {
-      date: 'April 25, 2024',
-      title: 'Record-Breaking Heat Wave in Southeast Asia',
-      description: 'Temperatures reach unprecedented levels across multiple countries.',
-      severity: 'severe',
-      location: 'Southeast Asia',
-    },
-    {
-      date: 'April 22, 2024',
-      title: 'Heavy Rainfall Causes Flooding in Western Europe',
-      description: 'Several regions experience severe flooding due to continuous rainfall.',
-      severity: 'warning',
-      location: 'Western Europe',
-    },
-    {
-      date: 'April 20, 2024',
-      title: 'Tornado Outbreak in Central Plains',
-      description: 'Multiple tornadoes reported across several states.',
-      severity: 'severe',
-      location: 'Central Plains, USA',
-    },
-    {
-      date: 'April 18, 2024',
-      title: 'Unusual Snowfall in Northern Regions',
-      description: 'Late-season snow affects transportation and daily activities.',
-      severity: 'warning',
-      location: 'Northern Hemisphere',
-    },
-    {
-      date: 'April 15, 2024',
-      title: 'Drought Conditions Worsen in Southwest',
-      description: 'Water restrictions implemented in affected areas.',
-      severity: 'severe',
-      location: 'Southwest USA',
-    },
-    {
-      date: 'April 12, 2024',
-      title: 'Coastal Flooding Along Eastern Seaboard',
-      description: 'High tides and storm surge cause flooding in coastal communities.',
-      severity: 'warning',
-      location: 'Eastern USA',
-    },
-    {
-      date: 'April 10, 2024',
-      title: 'Wildfire Risk Increases in Western States',
-      description: 'Dry conditions and high winds create dangerous fire conditions.',
-      severity: 'severe',
-      location: 'Western USA',
-    },
-    {
-      date: 'April 8, 2024',
-      title: 'Tropical Storm Forms in Atlantic',
-      description: 'Early season tropical storm develops off the coast of Africa.',
-      severity: 'warning',
-      location: 'Atlantic Ocean',
-    },
-    {
-      date: 'April 5, 2024',
-      title: 'Air Quality Alert in Major Cities',
-      description: 'Poor air quality affects urban areas due to weather conditions.',
-      severity: 'warning',
-      location: 'Global Urban Centers',
-    },
-  ];
+const StyledCardContent = styled(CardContent)({
+  flexGrow: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '16px',
+});
 
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'severe':
-        return '#f44336';
-      case 'warning':
-        return '#ff9800';
-      default:
-        return '#2196f3';
-    }
+const NewsImage = styled('img')({
+  width: '100%',
+  height: '300px',
+  objectFit: 'cover',
+});
+
+const TitleTypography = styled(Typography)({
+  fontSize: '1.5rem',
+  fontWeight: 600,
+  marginBottom: '12px',
+});
+
+const SummaryTypography = styled(Typography)({
+  fontSize: '1rem',
+  marginTop: '12px',
+});
+
+const getSeverityColor = (severity) => {
+  switch (severity.toLowerCase()) {
+    case 'critical':
+      return '#d32f2f';
+    case 'extreme':
+      return '#f57c00';
+    case 'severe':
+      return '#ffc107';
+    case 'moderate':
+      return '#4caf50';
+    default:
+      return '#2196f3';
+  }
+};
+
+const ModalContent = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '90%',
+  maxWidth: '800px',
+  maxHeight: '90vh',
+  overflow: 'auto',
+  backgroundColor: 'white',
+  boxShadow: 24,
+  padding: theme.spacing(4),
+  borderRadius: theme.spacing(1),
+}));
+
+const WeatherNews = () => {
+  const [selectedArticle, setSelectedArticle] = useState(null);
+
+  const handleArticleClick = (article) => {
+    setSelectedArticle(article);
   };
 
+  const handleCloseModal = () => {
+    setSelectedArticle(null);
+  };
+
+  // Take only the first 10 articles
+  const displayedArticles = weatherNews.slice(0, 10);
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: 'white', mb: 4 }}>
-        Weather News & Alerts
-      </Typography>
-      
-      {weatherNews.map((news, index) => (
-        <NewsCard key={index}>
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <CalendarTodayIcon sx={{ color: 'text.secondary' }} />
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {news.date}
+    <Box sx={{ 
+      backgroundColor: 'rgba(176, 224, 255, 0.3)', 
+      minHeight: '100vh',
+      paddingBottom: 4 
+    }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
+          Weather News & Alerts
+        </Typography>
+        <Grid container spacing={4}>
+          {displayedArticles.map((article) => (
+            <Grid item xs={12} sm={6} key={article.id}>
+              <NewsCard onClick={() => handleArticleClick(article)}>
+                <NewsImage src={article.image} alt={article.title} />
+                <StyledCardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6" color="text.secondary">
+                      {article.date}
+                    </Typography>
+                    <Chip
+                      label={article.severity}
+                      size="medium"
+                      sx={{
+                        backgroundColor: getSeverityColor(article.severity),
+                        color: 'white',
+                        fontSize: '0.9rem',
+                        padding: '4px',
+                      }}
+                    />
+                  </Box>
+                  <TitleTypography variant="h5" component="h2">
+                    {article.title}
+                  </TitleTypography>
+                  <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+                    {article.location}
                   </Typography>
-                  <Chip
-                    label={news.severity}
-                    size="small"
-                    sx={{
-                      backgroundColor: getSeverityColor(news.severity),
-                      color: 'white',
-                      ml: 'auto',
-                    }}
-                  />
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  {news.title}
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {news.description}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <WarningIcon sx={{ color: getSeverityColor(news.severity) }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Location: {news.location}
-                  </Typography>
-                </Box>
-              </Grid>
+                  <SummaryTypography variant="body1" color="text.secondary">
+                    {article.summary}
+                  </SummaryTypography>
+                </StyledCardContent>
+              </NewsCard>
             </Grid>
-          </CardContent>
-        </NewsCard>
-      ))}
-    </Container>
+          ))}
+        </Grid>
+
+        <Modal
+          open={Boolean(selectedArticle)}
+          onClose={handleCloseModal}
+          aria-labelledby="article-modal-title"
+        >
+          <ModalContent>
+            {selectedArticle && (
+              <>
+                <NewsImage
+                  src={selectedArticle.image}
+                  alt={selectedArticle.title}
+                  sx={{ height: '400px', borderRadius: 1 }}
+                />
+                <Box sx={{ mt: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6" color="text.secondary">
+                      {selectedArticle.date}
+                    </Typography>
+                    <Chip
+                      label={selectedArticle.severity}
+                      size="medium"
+                      sx={{
+                        backgroundColor: getSeverityColor(selectedArticle.severity),
+                        color: 'white',
+                        fontSize: '0.9rem',
+                        padding: '4px',
+                      }}
+                    />
+                  </Box>
+                  <Typography variant="h4" component="h2" gutterBottom>
+                    {selectedArticle.title}
+                  </Typography>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    {selectedArticle.location}
+                  </Typography>
+                  <Divider sx={{ my: 3 }} />
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                    {selectedArticle.fullArticle}
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+      </Container>
+    </Box>
   );
 };
 
