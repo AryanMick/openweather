@@ -232,7 +232,7 @@ const Home = ({ unit }) => {
                         {weatherData.name}
                       </Typography>
                       <Typography variant="h2">
-                        {Math.round(weatherData.main.temp)}°{unit === 'metric' ? 'C' : 'F'}
+                        {Math.round(weatherData.main.temp)}°C
                       </Typography>
                       <Typography variant="h6">
                         {weatherData.weather[0].description}
@@ -309,7 +309,7 @@ const Home = ({ unit }) => {
                                       alt={item.weather[0].description}
                                     />
                                     <Typography variant="h6">
-                                      {Math.round(item.main.temp)}°{unit === 'metric' ? 'C' : 'F'}
+                                      {Math.round(item.main.temp)}°C
                                     </Typography>
                                     <Typography variant="body2">
                                       {item.weather[0].description}

@@ -50,7 +50,7 @@ function App() {
               onRefresh={handleRefresh}
             />
             <Routes>
-              <Route path="/" element={<Home unit="imperial" refreshKey={refreshKey} />} />
+              <Route path="/" element={<Home unit="metric" refreshKey={refreshKey} />} />
               <Route path="/news" element={<WeatherNews />} />
             </Routes>
           </div>
